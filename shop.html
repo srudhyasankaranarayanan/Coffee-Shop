@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Shop</title>
+
+    <style>
+
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            background-color: #f5e6d3;
+        }
+
+        .nav{
+            background-color: #4b2e2e;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .nav a{
+            color: white;
+            margin: 10px;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .nav a:hover{
+            color: #ffcc99;
+        }
+
+        .section-title{
+            text-align: center;
+            margin-top: 30px;
+            font-size: 30px;
+            color: #4b2e2e;
+        }
+
+        .Main{
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px;
+        }
+
+        .card{
+            background-color: white;
+            width: 220px;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
+            text-align: center;
+        }
+
+        .card img{
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .card:hover{
+            transform: scale(1.05);
+            transition: 0.3s;
+        }
+
+        button{
+            padding: 8px 12px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4b2e2e;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover{
+            background-color: #c97b63;
+        }
+
+        p{
+            font-size: 18px;
+            font-weight: bold;
+            color: #4b2e2e;
+        }
+
+        .quantity-box{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .quantity-box span{
+            font-size: 20px;
+            font-weight: bold;
+            width: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="nav">
+        <a href="home.html">Home</a>
+        <a href="Register.html"></a>
+        <a href="login.html">Login</a>
+        <a href="Menu.html">Menu</a>
+        <a href="shop.html">Shop</a>
+        <a href="cart.html">Cart</a>
+    </div>
+
+    <h2 class="section-title">☕ Our Coffee Collection ☕</h2>
+
+    <div class="Main">
+
+        <!-- Cappuccino -->
+        <div class="card">
+            <h3>Cappuccino</h3>
+            <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93" alt="Cappuccino">
+            <p>Rs.180</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty1')">-</button>
+                <span id="qty1">0</span>
+                <button onclick="increaseQuantity('qty1')">+</button>
+            </div>
+
+            <button onclick="orderitem('Cappuccino')">Buy Now</button>
+            <button onclick="Addcart('Cappuccino','qty1')">Add Cart</button>
+        </div>
+
+        <!-- Espresso -->
+        <div class="card">
+            <h3>Espresso</h3>
+            <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348" alt="Espresso">
+            <p>Rs.150</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty2')">-</button>
+                <span id="qty2">0</span>
+                <button onclick="increaseQuantity('qty2')">+</button>
+            </div>
+
+            <button onclick="orderitem('Espresso')">Buy Now</button>
+            <button onclick="Addcart('Espresso','qty2')">Add Cart</button>
+        </div>
+
+        <!-- Latte -->
+        <div class="card">
+            <h3>Latte</h3>
+            <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085" alt="Latte">
+            <p>Rs.220</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty3')">-</button>
+                <span id="qty3">0</span>
+                <button onclick="increaseQuantity('qty3')">+</button>
+            </div>
+
+            <button onclick="orderitem('Latte')">Buy Now</button>
+            <button onclick="Addcart('Latte','qty3')">Add Cart</button>
+        </div>
+
+        <!-- Mocha -->
+        <div class="card">
+            <h3>Mocha</h3>
+            <img src="https://gatherforbread.com/wp-content/uploads/2014/10/Dark-Chocolate-Mocha-1-683x1024.jpg" alt="Mocha">
+            <p>Rs.250</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty4')">-</button>
+                <span id="qty4">0</span>
+                <button onclick="increaseQuantity('qty4')">+</button>
+            </div>
+
+            <button onclick="orderitem('Mocha')">Buy Now</button>
+            <button onclick="Addcart('Mocha','qty4')">Add Cart</button>
+        </div>
+
+        <!-- Cold Coffee -->
+        <div class="card">
+            <h3>Cold Coffee</h3>
+            <img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c" alt="Cold Coffee">
+            <p>Rs.200</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty5')">-</button>
+                <span id="qty5">0</span>
+                <button onclick="increaseQuantity('qty5')">+</button>
+            </div>
+
+            <button onclick="orderitem('Cold Coffee')">Buy Now</button>
+            <button onclick="Addcart('Cold Coffee','qty5')">Add Cart</button>
+        </div>
+
+        <!-- Americano -->
+        <div class="card">
+            <h3>Americano</h3>
+            <img src="https://images.unsplash.com/photo-1498804103079-a6351b050096" alt="Americano">
+            <p>Rs.170</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty6')">-</button>
+                <span id="qty6">0</span>
+                <button onclick="increaseQuantity('qty6')">+</button>
+            </div>
+
+            <button onclick="orderitem('Americano')">Buy Now</button>
+            <button onclick="Addcart('Americano','qty6')">Add Cart</button>
+        </div>
+
+        <!-- Nitro Coffee -->
+        <div class="card">
+            <h3>Nitro Coffee</h3>
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_ZcJOr1zaqJ-TkW9Ie1PcNRRrgPDnNSgX9A&s" alt="Nitro Coffee">
+            <p>Rs.300</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty7')">-</button>
+                <span id="qty7">0</span>
+                <button onclick="increaseQuantity('qty7')">+</button>
+            </div>
+
+            <button onclick="orderitem('Nitro Coffee')">Buy Now</button>
+            <button onclick="Addcart('Nitro Coffee','qty7')">Add Cart</button>
+        </div>
+
+        <!-- Affogato -->
+        <div class="card">
+            <h3>Affogato</h3>
+            <img src="https://www.thespruceeats.com/thmb/5PcCBEaUd1U1eFxfcKKPLVnZzfA=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/affogato-4776668-hero-08-40d7a68d12ba46f48eaea3c43aba715c.jpg" alt="Affogato">
+            <p>Rs.350</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty8')">-</button>
+                <span id="qty8">0</span>
+                <button onclick="increaseQuantity('qty8')">+</button>
+            </div>
+
+            <button onclick="orderitem('Affogato')">Buy Now</button>
+            <button onclick="Addcart('Affogato','qty8')">Add Cart</button>
+        </div>
+
+        <!-- Mud Coffee -->
+        <div class="card">
+            <h3>Mud Coffee</h3>
+            <img src="https://dt4l9bx31tioh.cloudfront.net/eazymedia/restaurant/698647/restaurant020240925044851.jpg?width=750&height=436&mode=fit" alt="Mud Coffee">
+            <p>Rs.370</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty9')">-</button>
+                <span id="qty9">0</span>
+                <button onclick="increaseQuantity('qty9')">+</button>
+            </div>
+
+            <button onclick="orderitem('Mud Coffee')">Buy Now</button>
+            <button onclick="Addcart('Mud Coffee','qty9')">Add Cart</button>
+        </div>
+
+        <!-- Pumpkin Spice Latte -->
+        <div class="card">
+            <h3>Pumpkin Spice Latte</h3>
+            <img src="https://swirlsofflavor.com/wp-content/uploads/2024/10/Ice-pumpkin-latte-DP-1200-feature-500x375.jpg" alt="Pumpkin Spice Latte">
+            <p>Rs.370</p>
+
+            <div class="quantity-box">
+                <button onclick="decreaseQuantity('qty10')">-</button>
+                <span id="qty10">0</span>
+                <button onclick="increaseQuantity('qty10')">+</button>
+            </div>
+
+            <button onclick="orderitem('Pumpkin Spice Latte')">Buy Now</button>
+            <button onclick="Addcart('Pumpkin Spice Latte','qty10')">Add Cart</button>
+        </div>
+
+    </div>
+
+    <script>
+
+        function increaseQuantity(id){
+
+            let qty = document.getElementById(id);
+
+            qty.innerText = parseInt(qty.innerText) + 1;
+        }
+
+        function decreaseQuantity(id){
+
+            let qty = document.getElementById(id);
+
+            let current = parseInt(qty.innerText);
+
+            if(current > 0){
+                qty.innerText = current - 1;
+            }
+        }
+
+        function orderitem(product){
+
+            alert(product + " ordered successfully!");
+        }
+
+        function Addcart(product, qtyId){
+
+            let quantity = document.getElementById(qtyId).innerText;
+
+            alert(quantity + " " + product + "(s) added to cart!");
+        }
+
+    </script>
+
+</body>
+</html>

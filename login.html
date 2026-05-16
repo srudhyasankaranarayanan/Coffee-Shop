@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Coffee Shop Login</title>
+
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box{
+            background: rgba(0,0,0,0.7);
+            padding: 40px;
+            width: 320px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .login-box h1{
+            margin-bottom: 25px;
+            color: #f5c16c;
+        }
+
+        .input-box{
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .input-box input{
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .login-btn{
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #c68b59;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .login-btn:hover{
+            background-color: #a66b3d;
+        }
+
+        .bottom-text{
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .bottom-text a{
+            color: #f5c16c;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+        <h1>☕ Coffee Shop</h1>
+
+        <form>
+            <div class="input-box">
+                <input type="text" placeholder="Enter Username" required>
+            </div>
+
+            <div class="input-box">
+                <input type="password" placeholder="Enter Password" required>
+            </div>
+
+            <button class="login-btn">Login</button>
+        </form>
+
+        <div class="bottom-text">
+            Don't have an account?
+            <a href="#">Register</a>
+        </div>
+    </div>
+
+</body>
+</html>

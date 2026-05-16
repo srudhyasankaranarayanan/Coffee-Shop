@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Coffee Shop Register</title>
+
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            font-family: Arial;
+            background-image: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-box{
+            background: rgba(0,0,0,0.7);
+            padding: 35px;
+            width: 350px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        h1{
+            color: #f5c16c;
+            margin-bottom: 20px;
+        }
+
+        input{
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button{
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #c68b59;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        button:hover{
+            background: #a66b3d;
+        }
+
+        a{
+            color: #f5c16c;
+            text-decoration: none;
+        }
+
+        p{
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="register-box">
+        <h1>☕ Register</h1>
+
+        <form>
+            <input type="text" placeholder="Full Name" required>
+
+            <input type="email" placeholder="Email Address" required>
+
+            <input type="password" placeholder="Password" required>
+
+            <input type="password" placeholder="Confirm Password" required>
+
+            <button>Register</button>
+        </form>
+
+        <p>
+            Already have an account?
+            <a href="login.html">Login</a>
+        </p>
+    </div>
+
+</body>
+</html>
