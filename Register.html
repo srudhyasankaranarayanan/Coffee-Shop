@@ -3,102 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-</head>
-<body>
-    
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Coffee Shop Register</title>
-
+    <title>Register — Brew Haven</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
-        body{
-            margin: 0;
-            padding: 0;
-            font-family: Arial;
-            background-image: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93');
-            background-size: cover;
-            background-position: center;
-            height: 100vh;
+        :root{--cream:#F5ECD7;--espresso:#1C0F07;--caramel:#C68B3E;--latte:#D4A96A;--fog:#EDE0C8;--dark-roast:#2E1B0E;}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--espresso);color:var(--cream);font-family:'Cormorant Garamond',serif;min-height:100vh;display:flex;cursor:none;overflow:hidden;}
+        .cursor{width:10px;height:10px;background:var(--caramel);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;}
+        .cursor-ring{width:36px;height:36px;border:1.5px solid var(--caramel);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .3s;opacity:.6;}
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        .left-panel{flex:1;position:relative;overflow:hidden;display:none;}
+        @media(min-width:800px){.left-panel{display:block;}}
+        .left-panel img{width:100%;height:100%;object-fit:cover;filter:brightness(.3) saturate(.65);}
+        .left-overlay{position:absolute;inset:0;background:linear-gradient(to right,transparent,var(--espresso));display:flex;flex-direction:column;justify-content:flex-end;padding:60px 50px;}
+        .left-quote{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;line-height:1.15;color:var(--cream);margin-bottom:16px;}
+        .left-quote em{font-style:italic;color:var(--caramel);}
+        .left-attr{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--fog);opacity:.4;}
 
-        .register-box{
-            background: rgba(0,0,0,0.7);
-            padding: 35px;
-            width: 350px;
-            border-radius: 15px;
-            color: white;
-            text-align: center;
-        }
+        .right-panel{width:100%;max-width:480px;display:flex;flex-direction:column;justify-content:center;padding:50px 50px;background:var(--dark-roast);overflow-y:auto;}
+        @media(min-width:800px){.right-panel{min-height:100vh;}}
 
-        h1{
-            color: #f5c16c;
-            margin-bottom: 20px;
-        }
+        .brand{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--cream);margin-bottom:46px;text-decoration:none;display:block;}
+        .brand span{color:var(--caramel);}
 
-        input{
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-        }
+        .form-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--caramel);margin-bottom:12px;}
+        .form-title{font-family:'Playfair Display',serif;font-size:40px;font-weight:900;line-height:.95;color:var(--cream);margin-bottom:6px;}
+        .form-title em{font-style:italic;color:var(--caramel);}
+        .form-sub{font-size:16px;font-weight:300;color:var(--fog);opacity:.55;margin-bottom:36px;}
 
-        button{
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: #c68b59;
-            color: white;
-            font-size: 17px;
-            cursor: pointer;
-        }
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+        .form-group label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--fog);opacity:.5;}
+        .form-group input{background:rgba(28,15,7,.5);border:1px solid rgba(245,236,215,.12);color:var(--cream);padding:14px 16px;border-radius:2px;font-family:'Cormorant Garamond',serif;font-size:17px;outline:none;transition:border-color .3s;width:100%;}
+        .form-group input::placeholder{color:var(--fog);opacity:.3;}
+        .form-group input:focus{border-color:var(--caramel);}
+        .form-group input.error{border-color:#e06060;}
 
-        button:hover{
-            background: #a66b3d;
-        }
+        .error-msg{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;color:#e06060;margin-top:2px;display:none;}
+        .error-msg.show{display:block;}
 
-        a{
-            color: #f5c16c;
-            text-decoration: none;
-        }
+        .strength-bar{height:3px;background:rgba(245,236,215,.1);border-radius:2px;margin-top:6px;overflow:hidden;}
+        .strength-fill{height:100%;width:0;border-radius:2px;transition:width .4s,background .4s;}
 
-        p{
-            margin-top: 15px;
-        }
+        .btn-register{width:100%;padding:16px;background:var(--caramel);border:none;color:var(--espresso);cursor:pointer;border-radius:2px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;transition:background .3s,transform .2s;margin-top:8px;margin-bottom:22px;}
+        .btn-register:hover{background:var(--latte);transform:translateY(-2px);}
+        .btn-register:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+        .login-link{text-align:center;font-size:15px;font-weight:300;color:var(--fog);opacity:.55;}
+        .login-link a{color:var(--caramel);text-decoration:none;transition:color .2s;}
+        .login-link a:hover{color:var(--latte);}
+
+        .right-panel>*{animation:fadeUp .7s ease both;}
+        .brand{animation-delay:.05s} .form-eyebrow{animation-delay:.1s} .form-title{animation-delay:.15s} .form-sub{animation-delay:.2s}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
     </style>
 </head>
-
 <body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
 
-    <div class="register-box">
-        <h1>☕ Register</h1>
-
-        <form>
-            <input type="text" placeholder="Full Name" required>
-
-            <input type="email" placeholder="Email Address" required>
-
-            <input type="password" placeholder="Password" required>
-
-            <input type="password" placeholder="Confirm Password" required>
-
-            <button>Register</button>
-        </form>
-
-        <p>
-            Already have an account?
-            <a href="login.html">Login</a>
-        </p>
+    <div class="left-panel">
+        <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1200&q=80" alt="Coffee">
+        <div class="left-overlay">
+            <div class="left-quote">Start your <em>journey</em> with us today.</div>
+            <div class="left-attr">— Brew Haven, Est. 2009</div>
+        </div>
     </div>
 
+    <div class="right-panel">
+        <a href="Home.html" class="brand">Brew<span>Haven</span></a>
+
+        <div class="form-eyebrow">Create account</div>
+        <h1 class="form-title">Join <em>Us</em></h1>
+        <p class="form-sub">Your first cup is just a sign-up away.</p>
+
+        <form id="regForm" onsubmit="handleRegister(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" placeholder="Arun" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" placeholder="Kumar">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="regEmail" placeholder="arun@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" id="regPhone" placeholder="+91 98765 43210">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="pwdInput" placeholder="••••••••" oninput="checkStrength(this.value)" required>
+                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="pwdConfirm" placeholder="••••••••" required>
+                <span class="error-msg" id="pwdError">Passwords do not match.</span>
+            </div>
+
+            <button class="btn-register" id="regBtn" type="submit">Create Account →</button>
+            <p class="login-link">Already have an account? <a href="login.html">Sign in</a></p>
+        </form>
+    </div>
+
+    <script>
+        const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+        let mx=0,my=0,rx=0,ry=0;
+        document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+        (function a(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
+        document.querySelectorAll('a,button,input').forEach(el=>{
+            el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.opacity='.3';});
+            el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.opacity='.6';});
+        });
+
+        // If already logged in, skip to shop
+        if(localStorage.getItem('bhLoggedIn') === 'true') {
+            window.location.href = 'shop.html';
+        }
+
+        function checkStrength(v) {
+            const fill = document.getElementById('strengthFill');
+            let score = 0;
+            if(v.length >= 8) score++;
+            if(/[A-Z]/.test(v)) score++;
+            if(/[0-9]/.test(v)) score++;
+            if(/[^A-Za-z0-9]/.test(v)) score++;
+            const pcts = ['0%','25%','50%','75%','100%'];
+            const colors = ['','#e06060','#e09a3e','#C68B3E','#7fc47f'];
+            fill.style.width = pcts[score];
+            fill.style.background = colors[score];
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const pwd    = document.getElementById('pwdInput').value;
+            const pwdC   = document.getElementById('pwdConfirm').value;
+            const errEl  = document.getElementById('pwdError');
+
+            if(pwd !== pwdC) {
+                errEl.classList.add('show');
+                document.getElementById('pwdConfirm').classList.add('error');
+                return;
+            }
+            errEl.classList.remove('show');
+
+            const btn = document.getElementById('regBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating account…';
+
+            // Save user to localStorage
+            const user = {
+                firstName : document.getElementById('firstName').value.trim(),
+                lastName  : document.getElementById('lastName').value.trim(),
+                email     : document.getElementById('regEmail').value.trim(),
+                phone     : document.getElementById('regPhone').value.trim(),
+                username  : document.getElementById('regEmail').value.trim(), // email as username
+                password  : pwd
+            };
+            localStorage.setItem('bhUser', JSON.stringify(user));
+            // Mark as logged in immediately after registration
+            localStorage.setItem('bhLoggedIn', 'true');
+
+            setTimeout(() => {
+                // Registration → go straight to shop (already logged in)
+                window.location.href = 'shop.html';
+            }, 900);
+        }
+    </script>
 </body>
 </html>
