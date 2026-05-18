@@ -3,315 +3,711 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Shop</title>
+    <title>Shop — Brew Haven</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+    <!-- ╔══════════════════════════════════════╗
+         ║  AUTH GUARD — fires before anything  ║
+         ╚══════════════════════════════════════╝ -->
+    <script>
+        (function(){
+            if(localStorage.getItem('bhLoggedIn') !== 'true'){
+                window.location.replace('login.html?redirect=shop.html');
+            }
+        })();
+    </script>
 
     <style>
-
-        body{
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            background-color: #f5e6d3;
+        :root {
+            --cream: #F5ECD7;
+            --espresso: #1C0F07;
+            --caramel: #C68B3E;
+            --latte: #D4A96A;
+            --fog: #EDE0C8;
+            --dark-roast: #2E1B0E;
+            --card-bg: #231409;
         }
 
-        .nav{
-            background-color: #4b2e2e;
-            padding: 15px;
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--espresso);
+            color: var(--cream);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Cursor */
+        .cursor {
+            width: 10px; height: 10px;
+            background: var(--caramel);
+            border-radius: 50%;
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 9999;
+            transform: translate(-50%,-50%);
+            mix-blend-mode: screen;
+        }
+        .cursor-ring {
+            width: 36px; height: 36px;
+            border: 1.5px solid var(--caramel);
+            border-radius: 50%;
+            position: fixed; top: 0; left: 0;
+            pointer-events: none; z-index: 9998;
+            transform: translate(-50%,-50%);
+            transition: width .3s, height .3s, opacity .3s;
+            opacity: 0.6;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 22px 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(28,15,7,0.97), transparent);
+        }
+        .nav-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px; font-weight: 900; letter-spacing: 0.05em;
+            color: var(--cream); text-decoration: none;
+        }
+        .nav-logo span { color: var(--caramel); }
+        .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+        .nav-links a {
+            color: var(--fog); text-decoration: none;
+            font-family: 'DM Mono', monospace; font-size: 11px;
+            letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.7;
+            transition: opacity .3s, color .3s; position: relative;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -4px; left: 0;
+            width: 0; height: 1px; background: var(--caramel); transition: width .3s;
+        }
+        .nav-links a:hover { opacity: 1; color: var(--cream); }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a.active { opacity: 1; color: var(--caramel); }
+        .nav-links a.active::after { width: 100%; }
+        .nav-cart-btn {
+            background: var(--caramel); color: var(--espresso) !important;
+            padding: 9px 22px; border-radius: 2px; opacity: 1 !important;
+            font-weight: 400; transition: background .3s, transform .2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-cart-btn:hover { background: var(--latte) !important; transform: translateY(-1px); }
+        .nav-cart-btn::after { display: none !important; }
+        .cart-badge {
+            background: var(--espresso); color: var(--caramel);
+            border-radius: 50%; width: 18px; height: 18px;
+            font-size: 10px; display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+        }
+
+        /* User greeting chip in nav */
+        .nav-user {
+            font-family: 'DM Mono', monospace; font-size: 10px;
+            letter-spacing: .15em; text-transform: uppercase;
+            color: var(--fog); opacity: .5;
+        }
+        .nav-logout {
+            font-family: 'DM Mono', monospace; font-size: 10px;
+            letter-spacing: .18em; text-transform: uppercase;
+            color: var(--fog); opacity: .55; text-decoration: none;
+            transition: color .2s, opacity .2s;
+        }
+        .nav-logout:hover { color: #e06060; opacity: 1; }
+
+        /* PAGE HEADER */
+        .page-header {
+            padding: 140px 60px 60px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-header::before {
+            content: 'MENU';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -40%);
+            font-family: 'Playfair Display', serif;
+            font-size: 220px; font-weight: 900;
+            color: rgba(198,139,62,0.04);
+            letter-spacing: -0.04em;
+            pointer-events: none; user-select: none;
+            white-space: nowrap;
+        }
+        .page-eyebrow {
+            font-family: 'DM Mono', monospace; font-size: 11px;
+            letter-spacing: 0.3em; text-transform: uppercase;
+            color: var(--caramel); margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: center; gap: 14px;
+            animation: fadeUp .9s ease both;
+        }
+        .page-eyebrow::before, .page-eyebrow::after {
+            content: ''; display: block; width: 40px; height: 1px;
+            background: var(--caramel); opacity: 0.5;
+        }
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(42px, 7vw, 88px); font-weight: 900;
+            line-height: 0.95; letter-spacing: -0.02em; color: var(--cream);
+            animation: fadeUp .9s .1s ease both;
+        }
+        .page-title em { font-style: italic; color: var(--caramel); }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .nav a{
-            color: white;
-            margin: 10px;
-            text-decoration: none;
-            font-size: 18px;
+        /* FILTER TABS */
+        .filter-bar {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 0 60px 50px; flex-wrap: wrap;
+            animation: fadeUp .9s .2s ease both;
+        }
+        .filter-btn {
+            font-family: 'DM Mono', monospace; font-size: 10px;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            padding: 10px 24px; border-radius: 2px; cursor: pointer;
+            border: 1px solid rgba(245,236,215,0.18);
+            background: transparent; color: var(--fog);
+            transition: all .3s; opacity: 0.65;
+        }
+        .filter-btn:hover { opacity: 1; border-color: var(--caramel); color: var(--cream); }
+        .filter-btn.active {
+            background: var(--caramel); border-color: var(--caramel);
+            color: var(--espresso); opacity: 1;
         }
 
-        .nav a:hover{
-            color: #ffcc99;
+        /* GRID */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2px;
+            padding: 0 60px 80px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        .section-title{
-            text-align: center;
-            margin-top: 30px;
-            font-size: 30px;
-            color: #4b2e2e;
+        /* CARD */
+        .card {
+            background: var(--card-bg);
+            position: relative; overflow: hidden;
+            cursor: none; transition: transform .4s ease;
+        }
+        .card:hover { transform: translateY(-4px); }
+        .card:hover .card-img { filter: brightness(0.5) saturate(0.7); transform: scale(1.06); }
+
+        .card-img-wrap { position: relative; overflow: hidden; height: 240px; }
+        .card-img {
+            width: 100%; height: 100%; object-fit: cover;
+            filter: brightness(0.7) saturate(0.8);
+            transition: filter .5s ease, transform .6s ease;
+        }
+        .card-badge {
+            position: absolute; top: 14px; left: 14px;
+            font-family: 'DM Mono', monospace; font-size: 9px;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            padding: 5px 10px; background: var(--caramel); color: var(--espresso);
+            border-radius: 2px;
+        }
+        .card-price-tag {
+            position: absolute; top: 14px; right: 14px;
+            font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700;
+            color: var(--cream);
+            background: rgba(28,15,7,0.75); backdrop-filter: blur(6px);
+            padding: 6px 12px; border-radius: 2px;
         }
 
-        .Main{
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin: 20px;
+        .card-body { padding: 20px 22px 22px; }
+        .card-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px; font-weight: 700; color: var(--cream);
+            line-height: 1.15; margin-bottom: 6px;
+        }
+        .card-desc {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px; font-weight: 300; color: var(--fog);
+            opacity: 0.6; line-height: 1.55; margin-bottom: 18px;
         }
 
-        .card{
-            background-color: white;
-            width: 220px;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px gray;
-            text-align: center;
+        .qty-row {
+            display: flex; align-items: center; justify-content: space-between;
+            border-top: 1px solid rgba(245,236,215,0.08);
+            padding-top: 16px;
         }
-
-        .card img{
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 10px;
+        .qty-control { display: flex; align-items: center; gap: 12px; }
+        .qty-btn {
+            width: 30px; height: 30px; border-radius: 2px;
+            border: 1px solid rgba(245,236,215,0.2); background: transparent;
+            color: var(--cream); font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color .2s, background .2s; line-height: 1;
         }
-
-        .card:hover{
-            transform: scale(1.05);
-            transition: 0.3s;
+        .qty-btn:hover { border-color: var(--caramel); background: rgba(198,139,62,0.12); }
+        .qty-num {
+            font-family: 'DM Mono', monospace; font-size: 16px;
+            color: var(--cream); min-width: 22px; text-align: center;
         }
-
-        button{
-            padding: 8px 12px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4b2e2e;
-            color: white;
-            cursor: pointer;
+        .btn-add-cart {
+            font-family: 'DM Mono', monospace; font-size: 10px;
+            letter-spacing: 0.18em; text-transform: uppercase;
+            padding: 10px 18px; border-radius: 2px;
+            background: rgba(198,139,62,0.12); border: 1px solid var(--caramel);
+            color: var(--caramel); cursor: pointer;
+            transition: background .3s, transform .2s;
         }
-
-        button:hover{
-            background-color: #c97b63;
+        .btn-add-cart:hover { background: var(--caramel); color: var(--espresso); transform: translateY(-1px); }
+        .btn-buy-now {
+            font-family: 'DM Mono', monospace; font-size: 10px;
+            letter-spacing: 0.18em; text-transform: uppercase;
+            padding: 10px 18px; border-radius: 2px;
+            background: var(--caramel); border: none;
+            color: var(--espresso); cursor: pointer; margin-top: 10px; width: 100%;
+            transition: background .3s, transform .2s;
         }
+        .btn-buy-now:hover { background: var(--latte); transform: translateY(-1px); }
 
-        p{
-            font-size: 18px;
-            font-weight: bold;
-            color: #4b2e2e;
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 36px; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: var(--dark-roast); border: 1px solid rgba(198,139,62,0.4);
+            color: var(--cream); padding: 14px 28px; border-radius: 2px;
+            font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.15em;
+            z-index: 500; transition: transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s;
+            opacity: 0; pointer-events: none; white-space: nowrap;
         }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-icon { color: var(--caramel); margin-right: 8px; }
 
-        .quantity-box{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin: 10px 0;
+        /* CART DRAWER */
+        .cart-overlay { position:fixed;inset:0;background:rgba(28,15,7,0.7);z-index:200;opacity:0;pointer-events:none;transition:opacity .4s; }
+        .cart-overlay.open { opacity:1;pointer-events:all; }
+        .cart-drawer { position:fixed;top:0;right:0;bottom:0;width:420px;max-width:95vw;background:var(--dark-roast);z-index:201;transform:translateX(100%);transition:transform .45s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden; }
+        .cart-drawer.open { transform:translateX(0); }
+        .drawer-header { padding:28px 30px 20px;border-bottom:1px solid rgba(245,236,215,.08);display:flex;align-items:center;justify-content:space-between; }
+        .drawer-title { font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--cream); }
+        .drawer-title em { font-style:italic;color:var(--caramel); }
+        .drawer-close { background:none;border:1px solid rgba(245,236,215,.2);color:var(--fog);width:34px;height:34px;border-radius:2px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:border-color .2s; }
+        .drawer-close:hover { border-color:var(--caramel);color:var(--cream); }
+        .drawer-items { flex:1;overflow-y:auto;padding:20px 30px; }
+        .drawer-item { display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(245,236,215,.06); }
+        .drawer-item-name { font-family:'Playfair Display',serif;font-size:17px;color:var(--cream);flex:1; }
+        .drawer-item-qty { font-family:'DM Mono',monospace;font-size:11px;color:var(--caramel);letter-spacing:.1em; }
+        .drawer-item-price { font-family:'DM Mono',monospace;font-size:12px;color:var(--fog);opacity:.7;min-width:60px;text-align:right; }
+        .drawer-item-remove { background:none;border:none;color:var(--fog);opacity:.35;cursor:pointer;font-size:14px;transition:opacity .2s,color .2s; }
+        .drawer-item-remove:hover { opacity:1;color:#e06060; }
+        .drawer-empty { text-align:center;padding:60px 0;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--fog);opacity:.4; }
+        .drawer-footer { padding:20px 30px 30px;border-top:1px solid rgba(245,236,215,.08); }
+        .drawer-total { display:flex;justify-content:space-between;align-items:center;margin-bottom:18px; }
+        .drawer-total-label { font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--fog);opacity:.55; }
+        .drawer-total-val { font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--cream); }
+        .btn-checkout { width:100%;padding:16px;background:var(--caramel);border:none;color:var(--espresso);cursor:pointer;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;transition:background .3s; }
+        .btn-checkout:hover { background:var(--latte); }
+
+        /* REVEAL */
+        .reveal { opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease; }
+        .reveal.visible { opacity:1;transform:translateY(0); }
+
+        /* FOOTER */
+        footer { background:var(--dark-roast);border-top:1px solid rgba(245,236,215,.07);padding:50px 60px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px; }
+        .footer-logo { font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--cream); }
+        .footer-logo span { color:var(--caramel); }
+        .footer-copy { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--fog);opacity:.3; }
+
+        @media (max-width: 900px) {
+            nav { padding:16px 24px; }
+            .page-header { padding:120px 24px 40px; }
+            .filter-bar { padding:0 24px 40px; }
+            .menu-grid { padding:0 24px 60px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); }
+            footer { padding:40px 24px; }
         }
-
-        .quantity-box span{
-            font-size: 20px;
-            font-weight: bold;
-            width: 20px;
+        @media (max-width: 600px) {
+            .nav-links li:not(:last-child) { display:none; }
+            .menu-grid { grid-template-columns:1fr; }
         }
-
     </style>
 </head>
-
 <body>
 
-    <div class="nav">
-        <a href="home.html">Home</a>
-        <a href="Register.html"></a>
-        <a href="login.html">Login</a>
-        <a href="Menu.html">Menu</a>
-        <a href="shop.html">Shop</a>
-        <a href="cart.html">Cart</a>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <!-- Nav -->
+    <nav>
+        <a href="Home.html" class="nav-logo">Brew<span>Haven</span></a>
+        <ul class="nav-links">
+            <li><a href="Home.html">Home</a></li>
+            <li><a href="shop.html" class="active">Menu</a></li>
+            <li><a class="nav-user" id="navUserLabel"></a></li>
+            <li><a href="logout.html" class="nav-logout">Sign Out</a></li>
+            <li>
+                <a href="#" class="nav-cart-btn" id="cartNavBtn" onclick="openCart(event)">
+                    Cart <span class="cart-badge" id="cartCount">0</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="page-eyebrow">Brew Haven — Coffee Menu</div>
+        <h1 class="page-title">Our <em>Collection</em></h1>
     </div>
 
-    <h2 class="section-title">☕ Our Coffee Collection ☕</h2>
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterCards('all', this)">All</button>
+        <button class="filter-btn" onclick="filterCards('classic', this)">Classics</button>
+        <button class="filter-btn" onclick="filterCards('cold', this)">Cold Brews</button>
+        <button class="filter-btn" onclick="filterCards('specialty', this)">Specialties</button>
+        <button class="filter-btn" onclick="filterCards('seasonal', this)">Seasonal</button>
+    </div>
 
-    <div class="Main">
+    <!-- Menu Grid -->
+    <div class="menu-grid" id="menuGrid">
 
-        <!-- Cappuccino -->
-        <div class="card">
-            <h3>Cappuccino</h3>
-            <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93" alt="Cappuccino">
-            <p>Rs.180</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty1')">-</button>
-                <span id="qty1">0</span>
-                <button onclick="increaseQuantity('qty1')">+</button>
+        <div class="card reveal" data-category="classic">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=80" alt="Cappuccino">
+                <span class="card-badge">Classic</span>
+                <span class="card-price-tag">₹180</span>
             </div>
-
-            <button onclick="orderitem('Cappuccino')">Buy Now</button>
-            <button onclick="Addcart('Cappuccino','qty1')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Cappuccino</div>
+                <div class="card-desc">Velvety espresso with steamed milk foam and a dusting of cocoa.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty1',-1)">−</button>
+                        <span class="qty-num" id="qty1">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty1',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Cappuccino','qty1',180)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Cappuccino')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Espresso -->
-        <div class="card">
-            <h3>Espresso</h3>
-            <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348" alt="Espresso">
-            <p>Rs.150</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty2')">-</button>
-                <span id="qty2">0</span>
-                <button onclick="increaseQuantity('qty2')">+</button>
+        <div class="card reveal" data-category="classic">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://images.unsplash.com/photo-1511920170033-f8396924c348?w=600&q=80" alt="Espresso">
+                <span class="card-badge">Classic</span>
+                <span class="card-price-tag">₹150</span>
             </div>
-
-            <button onclick="orderitem('Espresso')">Buy Now</button>
-            <button onclick="Addcart('Espresso','qty2')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Espresso</div>
+                <div class="card-desc">Pure, concentrated shot of dark roast perfection — bold and unapologetic.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty2',-1)">−</button>
+                        <span class="qty-num" id="qty2">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty2',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Espresso','qty2',150)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Espresso')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Latte -->
-        <div class="card">
-            <h3>Latte</h3>
-            <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085" alt="Latte">
-            <p>Rs.220</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty3')">-</button>
-                <span id="qty3">0</span>
-                <button onclick="increaseQuantity('qty3')">+</button>
+        <div class="card reveal" data-category="classic">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80" alt="Latte">
+                <span class="card-badge">Classic</span>
+                <span class="card-price-tag">₹220</span>
             </div>
-
-            <button onclick="orderitem('Latte')">Buy Now</button>
-            <button onclick="Addcart('Latte','qty3')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Latte</div>
+                <div class="card-desc">Silky steamed milk blended with a double shot of smooth espresso.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty3',-1)">−</button>
+                        <span class="qty-num" id="qty3">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty3',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Latte','qty3',220)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Latte')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Mocha -->
-        <div class="card">
-            <h3>Mocha</h3>
-            <img src="https://gatherforbread.com/wp-content/uploads/2014/10/Dark-Chocolate-Mocha-1-683x1024.jpg" alt="Mocha">
-            <p>Rs.250</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty4')">-</button>
-                <span id="qty4">0</span>
-                <button onclick="increaseQuantity('qty4')">+</button>
+        <div class="card reveal" data-category="specialty">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://gatherforbread.com/wp-content/uploads/2014/10/Dark-Chocolate-Mocha-1-683x1024.jpg" alt="Mocha">
+                <span class="card-badge">Specialty</span>
+                <span class="card-price-tag">₹250</span>
             </div>
-
-            <button onclick="orderitem('Mocha')">Buy Now</button>
-            <button onclick="Addcart('Mocha','qty4')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Mocha</div>
+                <div class="card-desc">Rich espresso meets dark chocolate syrup and whipped cream — indulgent.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty4',-1)">−</button>
+                        <span class="qty-num" id="qty4">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty4',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Mocha','qty4',250)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Mocha')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Cold Coffee -->
-        <div class="card">
-            <h3>Cold Coffee</h3>
-            <img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c" alt="Cold Coffee">
-            <p>Rs.200</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty5')">-</button>
-                <span id="qty5">0</span>
-                <button onclick="increaseQuantity('qty5')">+</button>
+        <div class="card reveal" data-category="cold">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=600&q=80" alt="Cold Coffee">
+                <span class="card-badge">Cold Brew</span>
+                <span class="card-price-tag">₹200</span>
             </div>
-
-            <button onclick="orderitem('Cold Coffee')">Buy Now</button>
-            <button onclick="Addcart('Cold Coffee','qty5')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Cold Coffee</div>
+                <div class="card-desc">Chilled coffee blended smooth with milk and ice — refreshingly deep.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty5',-1)">−</button>
+                        <span class="qty-num" id="qty5">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty5',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Cold Coffee','qty5',200)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Cold Coffee')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Americano -->
-        <div class="card">
-            <h3>Americano</h3>
-            <img src="https://images.unsplash.com/photo-1498804103079-a6351b050096" alt="Americano">
-            <p>Rs.170</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty6')">-</button>
-                <span id="qty6">0</span>
-                <button onclick="increaseQuantity('qty6')">+</button>
+        <div class="card reveal" data-category="classic">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://images.unsplash.com/photo-1498804103079-a6351b050096?w=600&q=80" alt="Americano">
+                <span class="card-badge">Classic</span>
+                <span class="card-price-tag">₹170</span>
             </div>
-
-            <button onclick="orderitem('Americano')">Buy Now</button>
-            <button onclick="Addcart('Americano','qty6')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Americano</div>
+                <div class="card-desc">Espresso diluted with hot water to a long, clean, deeply aromatic cup.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty6',-1)">−</button>
+                        <span class="qty-num" id="qty6">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty6',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Americano','qty6',170)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Americano')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Nitro Coffee -->
-        <div class="card">
-            <h3>Nitro Coffee</h3>
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_ZcJOr1zaqJ-TkW9Ie1PcNRRrgPDnNSgX9A&s" alt="Nitro Coffee">
-            <p>Rs.300</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty7')">-</button>
-                <span id="qty7">0</span>
-                <button onclick="increaseQuantity('qty7')">+</button>
+        <div class="card reveal" data-category="cold">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80" alt="Nitro Coffee">
+                <span class="card-badge">Cold Brew</span>
+                <span class="card-price-tag">₹300</span>
             </div>
-
-            <button onclick="orderitem('Nitro Coffee')">Buy Now</button>
-            <button onclick="Addcart('Nitro Coffee','qty7')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Nitro Coffee</div>
+                <div class="card-desc">Nitrogen-infused cold brew with a creamy cascade and velvety finish.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty7',-1)">−</button>
+                        <span class="qty-num" id="qty7">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty7',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Nitro Coffee','qty7',300)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Nitro Coffee')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Affogato -->
-        <div class="card">
-            <h3>Affogato</h3>
-            <img src="https://www.thespruceeats.com/thmb/5PcCBEaUd1U1eFxfcKKPLVnZzfA=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/affogato-4776668-hero-08-40d7a68d12ba46f48eaea3c43aba715c.jpg" alt="Affogato">
-            <p>Rs.350</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty8')">-</button>
-                <span id="qty8">0</span>
-                <button onclick="increaseQuantity('qty8')">+</button>
+        <div class="card reveal" data-category="specialty">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://www.thespruceeats.com/thmb/5PcCBEaUd1U1eFxfcKKPLVnZzfA=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/affogato-4776668-hero-08-40d7a68d12ba46f48eaea3c43aba715c.jpg" alt="Affogato">
+                <span class="card-badge">Specialty</span>
+                <span class="card-price-tag">₹350</span>
             </div>
-
-            <button onclick="orderitem('Affogato')">Buy Now</button>
-            <button onclick="Addcart('Affogato','qty8')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Affogato</div>
+                <div class="card-desc">A scoop of vanilla gelato drowned in a shot of hot espresso. Pure contrast.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty8',-1)">−</button>
+                        <span class="qty-num" id="qty8">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty8',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Affogato','qty8',350)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Affogato')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Mud Coffee -->
-        <div class="card">
-            <h3>Mud Coffee</h3>
-            <img src="https://dt4l9bx31tioh.cloudfront.net/eazymedia/restaurant/698647/restaurant020240925044851.jpg?width=750&height=436&mode=fit" alt="Mud Coffee">
-            <p>Rs.370</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty9')">-</button>
-                <span id="qty9">0</span>
-                <button onclick="increaseQuantity('qty9')">+</button>
+        <div class="card reveal" data-category="specialty">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://dt4l9bx31tioh.cloudfront.net/eazymedia/restaurant/698647/restaurant020240925044851.jpg?width=750&height=436&mode=fit" alt="Mud Coffee">
+                <span class="card-badge">Specialty</span>
+                <span class="card-price-tag">₹370</span>
             </div>
-
-            <button onclick="orderitem('Mud Coffee')">Buy Now</button>
-            <button onclick="Addcart('Mud Coffee','qty9')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Mud Coffee</div>
+                <div class="card-desc">A thick, unfiltered brew ground directly into the cup — rustic and intense.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty9',-1)">−</button>
+                        <span class="qty-num" id="qty9">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty9',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Mud Coffee','qty9',370)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Mud Coffee')">Buy Now</button>
+            </div>
         </div>
 
-        <!-- Pumpkin Spice Latte -->
-        <div class="card">
-            <h3>Pumpkin Spice Latte</h3>
-            <img src="https://swirlsofflavor.com/wp-content/uploads/2024/10/Ice-pumpkin-latte-DP-1200-feature-500x375.jpg" alt="Pumpkin Spice Latte">
-            <p>Rs.370</p>
-
-            <div class="quantity-box">
-                <button onclick="decreaseQuantity('qty10')">-</button>
-                <span id="qty10">0</span>
-                <button onclick="increaseQuantity('qty10')">+</button>
+        <div class="card reveal" data-category="seasonal">
+            <div class="card-img-wrap">
+                <img class="card-img" src="https://swirlsofflavor.com/wp-content/uploads/2024/10/Ice-pumpkin-latte-DP-1200-feature-500x375.jpg" alt="Pumpkin Spice Latte">
+                <span class="card-badge">Seasonal</span>
+                <span class="card-price-tag">₹370</span>
             </div>
-
-            <button onclick="orderitem('Pumpkin Spice Latte')">Buy Now</button>
-            <button onclick="Addcart('Pumpkin Spice Latte','qty10')">Add Cart</button>
+            <div class="card-body">
+                <div class="card-name">Pumpkin Spice Latte</div>
+                <div class="card-desc">Warm pumpkin, cinnamon and nutmeg with espresso and steamed milk.</div>
+                <div class="qty-row">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="changeQty('qty10',-1)">−</button>
+                        <span class="qty-num" id="qty10">0</span>
+                        <button class="qty-btn" onclick="changeQty('qty10',1)">+</button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addToCart('Pumpkin Spice Latte','qty10',370)">Add to Cart</button>
+                </div>
+                <button class="btn-buy-now" onclick="buyNow('Pumpkin Spice Latte')">Buy Now</button>
+            </div>
         </div>
 
     </div>
+
+    <!-- Cart Overlay + Drawer -->
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="drawer-header">
+            <div class="drawer-title">Your <em>Cart</em></div>
+            <button class="drawer-close" onclick="closeCart()">✕</button>
+        </div>
+        <div class="drawer-items" id="drawerItems">
+            <div class="drawer-empty">Your cart is empty.</div>
+        </div>
+        <div class="drawer-footer">
+            <div class="drawer-total">
+                <span class="drawer-total-label">Total</span>
+                <span class="drawer-total-val" id="cartTotal">₹0</span>
+            </div>
+            <button class="btn-checkout" onclick="window.location.href='payment.html'">Proceed to Checkout →</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"><span class="toast-icon">☕</span><span id="toastMsg"></span></div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Brew<span>Haven</span></div>
+        <div class="footer-copy">© 2026 Brew Haven Coffee Shop</div>
+    </footer>
 
     <script>
+        // ── Cursor ──────────────────────────────
+        const cursor = document.getElementById('cursor');
+        const ring   = document.getElementById('cursorRing');
+        let mx = 0, my = 0, rx = 0, ry = 0;
+        document.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+        });
+        (function animRing() {
+            rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+            ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+            requestAnimationFrame(animRing);
+        })();
+        document.querySelectorAll('a,button').forEach(el => {
+            el.addEventListener('mouseenter', () => { ring.style.width='52px'; ring.style.height='52px'; ring.style.opacity='0.3'; });
+            el.addEventListener('mouseleave', () => { ring.style.width='36px'; ring.style.height='36px'; ring.style.opacity='0.6'; });
+        });
 
-        function increaseQuantity(id){
-
-            let qty = document.getElementById(id);
-
-            qty.innerText = parseInt(qty.innerText) + 1;
-        }
-
-        function decreaseQuantity(id){
-
-            let qty = document.getElementById(id);
-
-            let current = parseInt(qty.innerText);
-
-            if(current > 0){
-                qty.innerText = current - 1;
+        // ── Show user greeting ───────────────────
+        try {
+            const u = JSON.parse(localStorage.getItem('bhUser'));
+            if(u && u.firstName) {
+                document.getElementById('navUserLabel').textContent = 'Hi, ' + u.firstName;
             }
+        } catch(e) {}
+
+        // ── Scroll reveal ────────────────────────
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach((e, i) => {
+                if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 80);
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+        // ── Qty ──────────────────────────────────
+        function changeQty(id, delta) {
+            const el = document.getElementById(id);
+            el.textContent = Math.max(0, parseInt(el.textContent) + delta);
         }
 
-        function orderitem(product){
-
-            alert(product + " ordered successfully!");
+        // ── Toast ────────────────────────────────
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2800);
         }
 
-        function Addcart(product, qtyId){
+        // ── Cart state ───────────────────────────
+        let cart = JSON.parse(localStorage.getItem('bhCart')) || [];
+        function saveCart() { localStorage.setItem('bhCart', JSON.stringify(cart)); }
 
-            let quantity = document.getElementById(qtyId).innerText;
-
-            alert(quantity + " " + product + "(s) added to cart!");
+        function renderCart() {
+            const el = document.getElementById('drawerItems');
+            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            document.getElementById('cartTotal').textContent = '₹' + total;
+            document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+            if (!cart.length) { el.innerHTML = '<div class="drawer-empty">Your cart is empty.</div>'; return; }
+            el.innerHTML = cart.map((item, idx) => `
+                <div class="drawer-item">
+                    <span class="drawer-item-name">${item.name}</span>
+                    <span class="drawer-item-qty">×${item.qty}</span>
+                    <span class="drawer-item-price">₹${item.price * item.qty}</span>
+                    <button class="drawer-item-remove" onclick="removeItem(${idx})">✕</button>
+                </div>
+            `).join('');
         }
 
+        function removeItem(idx) { cart.splice(idx, 1); saveCart(); renderCart(); }
+
+        function addToCart(name, qtyId, price) {
+            const qty = parseInt(document.getElementById(qtyId).textContent);
+            if (qty === 0) { showToast('Select a quantity first!'); return; }
+            const existing = cart.find(i => i.name === name);
+            if (existing) existing.qty += qty;
+            else cart.push({ name, qty, price });
+            saveCart(); renderCart();
+            showToast(qty + ' × ' + name + ' added!');
+            document.getElementById(qtyId).textContent = '0';
+        }
+
+        function buyNow(name) {
+            showToast(name + ' — ordering now!');
+            setTimeout(() => window.location.href = 'payment.html', 900);
+        }
+
+        function openCart(e) { e.preventDefault(); document.getElementById('cartOverlay').classList.add('open'); document.getElementById('cartDrawer').classList.add('open'); }
+        function closeCart() { document.getElementById('cartOverlay').classList.remove('open'); document.getElementById('cartDrawer').classList.remove('open'); }
+
+        // ── Filter ───────────────────────────────
+        function filterCards(cat, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.card').forEach(card => {
+                card.style.display = (cat === 'all' || card.dataset.category === cat) ? '' : 'none';
+            });
+        }
+
+        renderCart();
     </script>
 
 </body>
