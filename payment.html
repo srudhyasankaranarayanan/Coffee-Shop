@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment — Brew Haven</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+    <!-- AUTH GUARD -->
+    <script>
+        (function(){
+            if(localStorage.getItem('bhLoggedIn') !== 'true'){
+                window.location.replace('login.html?redirect=payment.html');
+            }
+        })();
+    </script>
+
+    <style>
+        :root {
+            --cream: #F5ECD7; --espresso: #1C0F07; --caramel: #C68B3E;
+            --latte: #D4A96A; --fog: #EDE0C8; --dark-roast: #2E1B0E;
+            --card-bg: #231409; --error: #e06060;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--espresso); color: var(--cream); font-family: 'Cormorant Garamond', serif; min-height: 100vh; cursor: none; overflow-x: hidden; }
+        .cursor { width:10px;height:10px;background:var(--caramel);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen; }
+        .cursor-ring { width:36px;height:36px;border:1.5px solid var(--caramel);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .3s;opacity:.6; }
+
+        /* NAV */
+        nav { position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 60px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(28,15,7,.97),transparent); }
+        .nav-logo { font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none; }
+        .nav-logo span { color:var(--caramel); }
+        .nav-links { display:flex;align-items:center;gap:36px;list-style:none; }
+        .nav-links a { color:var(--fog);text-decoration:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;opacity:.7;transition:opacity .3s,color .3s;position:relative; }
+        .nav-links a::after { content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--caramel);transition:width .3s; }
+        .nav-links a:hover { opacity:1;color:var(--cream); }
+        .nav-links a:hover::after { width:100%; }
+        .nav-user { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--fog);opacity:.5; }
+        .nav-logout { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--fog);opacity:.55;text-decoration:none;transition:color .2s,opacity .2s; }
+        .nav-logout:hover { color:#e06060;opacity:1; }
+        @media(max-width:700px){ nav{padding:16px 20px;} .nav-links li:not(:last-child){display:none;} }
+
+        /* LAYOUT */
+        .page-wrap { max-width:1100px;margin:0 auto;padding:130px 60px 80px;display:grid;grid-template-columns:1fr 420px;gap:40px;align-items:start; }
+        @media(max-width:900px){ .page-wrap{grid-template-columns:1fr;padding:120px 24px 60px;} }
+
+        /* HEADER */
+        .page-eyebrow { font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--caramel);margin-bottom:14px;display:flex;align-items:center;gap:14px; }
+        .page-eyebrow::before { content:'';display:block;width:40px;height:1px;background:var(--caramel);opacity:.5; }
+        .page-title { font-family:'Playfair Display',serif;font-size:clamp(38px,5vw,64px);font-weight:900;line-height:.95;color:var(--cream);margin-bottom:8px; }
+        .page-title em { font-style:italic;color:var(--caramel); }
+        .page-sub { font-size:17px;font-weight:300;color:var(--fog);opacity:.6;margin-bottom:40px; }
+
+        /* FORM */
+        .form-section { margin-bottom:34px; }
+        .section-label { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--caramel);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(245,236,215,.1); }
+        .form-row { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+        .form-group { display:flex;flex-direction:column;gap:6px;margin-bottom:14px; }
+        .form-group label { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--fog);opacity:.55; }
+        .form-group input, .form-group textarea, .form-group select { background:var(--card-bg);border:1px solid rgba(245,236,215,.12);color:var(--cream);padding:13px 16px;border-radius:2px;font-family:'Cormorant Garamond',serif;font-size:16px;outline:none;transition:border-color .3s;width:100%; }
+        .form-group input::placeholder, .form-group textarea::placeholder { color:var(--fog);opacity:.3; }
+        .form-group input:focus, .form-group textarea:focus { border-color:var(--caramel); }
+        .form-group textarea { resize:vertical;min-height:90px; }
+        .form-group select option { background:var(--dark-roast); }
+
+        /* PAYMENT METHODS */
+        .method-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px; }
+        .method-card { border:1px solid rgba(245,236,215,.12);background:var(--card-bg);padding:14px 16px;border-radius:2px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .3s,background .3s; }
+        .method-card:hover { border-color:rgba(198,139,62,.4); }
+        .method-card.selected { border-color:var(--caramel);background:rgba(198,139,62,.08); }
+        .method-card input[type=radio] { display:none; }
+        .method-icon { font-size:20px;line-height:1; }
+        .method-name { font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--fog);opacity:.8; }
+        .method-card.selected .method-name { color:var(--caramel);opacity:1; }
+
+        #cardFields { overflow:hidden;max-height:0;transition:max-height .4s ease,opacity .4s;opacity:0; }
+        #cardFields.open { max-height:300px;opacity:1; }
+
+        /* ORDER SUMMARY */
+        .summary-box { background:var(--card-bg);border:1px solid rgba(245,236,215,.1);border-radius:2px;padding:30px;position:sticky;top:110px; }
+        .summary-title { font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--cream);margin-bottom:24px; }
+        .summary-title em { font-style:italic;color:var(--caramel); }
+        .summary-items { border-top:1px solid rgba(245,236,215,.08);padding-top:16px;margin-bottom:20px; }
+        .summary-item { display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid rgba(245,236,215,.05); }
+        .summary-item-name { font-size:16px;font-weight:400;color:var(--cream); }
+        .summary-item-qty { font-family:'DM Mono',monospace;font-size:10px;color:var(--fog);opacity:.45;margin-left:6px; }
+        .summary-item-price { font-family:'DM Mono',monospace;font-size:12px;color:var(--fog);opacity:.7; }
+        .summary-empty { font-size:15px;color:var(--fog);opacity:.35;padding:16px 0;text-align:center; }
+        .summary-divider { height:1px;background:rgba(245,236,215,.1);margin:16px 0; }
+        .summary-row { display:flex;justify-content:space-between;align-items:center;margin-bottom:10px; }
+        .summary-row-label { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--fog);opacity:.5; }
+        .summary-row-val { font-family:'DM Mono',monospace;font-size:13px;color:var(--fog);opacity:.7; }
+        .summary-total { display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;border-top:1px solid rgba(245,236,215,.1);margin-top:4px; }
+        .summary-total-label { font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--fog);opacity:.55; }
+        .summary-total-val { font-family:'Playfair Display',serif;font-size:34px;font-weight:700;color:var(--cream); }
+
+        /* PAY BUTTON */
+        .btn-pay { width:100%;margin-top:24px;padding:17px;background:var(--caramel);border:none;color:var(--espresso);cursor:pointer;border-radius:2px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;transition:background .3s,transform .2s; }
+        .btn-pay:hover { background:var(--latte);transform:translateY(-2px); }
+        .btn-pay:disabled { opacity:.4;cursor:not-allowed;transform:none; }
+
+        .security-note { display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--fog);opacity:.3; }
+
+        /* FOOTER */
+        footer { background:var(--dark-roast);border-top:1px solid rgba(245,236,215,.07);padding:40px 60px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px; }
+        .footer-logo { font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream); }
+        .footer-logo span { color:var(--caramel); }
+        .footer-copy { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--fog);opacity:.3; }
+    </style>
+</head>
+<body>
+
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <nav>
+        <a href="Home.html" class="nav-logo">Brew<span>Haven</span></a>
+        <ul class="nav-links">
+            <li><a href="Home.html">Home</a></li>
+            <li><a href="shop.html">Menu</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a class="nav-user" id="navUserLabel"></a></li>
+            <li><a href="logout.html" class="nav-logout">Sign Out</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-wrap">
+
+        <!-- LEFT: FORM -->
+        <div>
+            <div class="page-eyebrow">Brew Haven</div>
+            <h1 class="page-title">Secure <em>Checkout</em></h1>
+            <p class="page-sub">Just a few details and your coffee is on its way.</p>
+
+            <form id="payForm" onsubmit="handlePay(event)">
+
+                <!-- Contact — pre-filled from stored user -->
+                <div class="form-section">
+                    <div class="section-label">Contact Details</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="fieldName" placeholder="Arun Kumar" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="fieldPhone" placeholder="+91 98765 43210" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="fieldEmail" placeholder="arun@email.com">
+                    </div>
+                </div>
+
+                <!-- Delivery -->
+                <div class="form-section">
+                    <div class="section-label">Delivery Address</div>
+                    <div class="form-group">
+                        <label>Street Address</label>
+                        <textarea placeholder="12, Anna Nagar, Chennai" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" placeholder="Chennai" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Pincode</label>
+                            <input type="text" placeholder="600040" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-section">
+                    <div class="section-label">Payment Method</div>
+                    <div class="method-grid">
+                        <label class="method-card selected" id="m-upi" onclick="selectMethod('upi')">
+                            <input type="radio" name="payment" value="upi" checked>
+                            <span class="method-icon">📱</span>
+                            <span class="method-name">UPI</span>
+                        </label>
+                        <label class="method-card" id="m-card" onclick="selectMethod('card')">
+                            <input type="radio" name="payment" value="card">
+                            <span class="method-icon">💳</span>
+                            <span class="method-name">Credit / Debit</span>
+                        </label>
+                        <label class="method-card" id="m-nb" onclick="selectMethod('nb')">
+                            <input type="radio" name="payment" value="nb">
+                            <span class="method-icon">🏦</span>
+                            <span class="method-name">Net Banking</span>
+                        </label>
+                        <label class="method-card" id="m-cod" onclick="selectMethod('cod')">
+                            <input type="radio" name="payment" value="cod">
+                            <span class="method-icon">🚚</span>
+                            <span class="method-name">Cash on Delivery</span>
+                        </label>
+                    </div>
+
+                    <div id="cardFields">
+                        <div class="form-group">
+                            <label>Card Number</label>
+                            <input type="text" id="cardNum" placeholder="1234  5678  9012  3456" maxlength="19" oninput="fmtCard(this)">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Card Holder Name</label>
+                                <input type="text" placeholder="Arun Kumar">
+                            </div>
+                            <div class="form-group">
+                                <label>Expiry</label>
+                                <input type="text" placeholder="MM / YY" maxlength="7" oninput="fmtExpiry(this)">
+                            </div>
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="password" placeholder="•••" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="upiFields">
+                        <div class="form-group">
+                            <label>UPI ID</label>
+                            <input type="text" placeholder="yourname@upi">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-pay" id="payBtn">Place Order →</button>
+                <div class="security-note">🔒 &nbsp; 256-bit encrypted &nbsp;·&nbsp; Secure checkout</div>
+            </form>
+        </div>
+
+        <!-- RIGHT: ORDER SUMMARY -->
+        <div class="summary-box">
+            <div class="summary-title">Order <em>Summary</em></div>
+            <div class="summary-items" id="summaryItems">
+                <div class="summary-empty">No items in cart.</div>
+            </div>
+            <div class="summary-row">
+                <span class="summary-row-label">Subtotal</span>
+                <span class="summary-row-val" id="subtotalVal">₹0</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-row-label">Delivery</span>
+                <span class="summary-row-val">₹40</span>
+            </div>
+            <div class="summary-total">
+                <span class="summary-total-label">Total</span>
+                <span class="summary-total-val" id="totalVal">₹40</span>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="footer-logo">Brew<span>Haven</span></div>
+        <div class="footer-copy">© 2026 Brew Haven Coffee Shop</div>
+    </footer>
+
+    <script>
+        // Cursor
+        const cursor = document.getElementById('cursor'), ring = document.getElementById('cursorRing');
+        let mx=0,my=0,rx=0,ry=0;
+        document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+        (function a(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
+        document.querySelectorAll('a,button,label').forEach(el=>{
+            el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.opacity='.3';});
+            el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.opacity='.6';});
+        });
+
+        // Pre-fill contact from stored user
+        try {
+            const u = JSON.parse(localStorage.getItem('bhUser'));
+            if(u) {
+                if(u.firstName) document.getElementById('fieldName').value = (u.firstName + ' ' + (u.lastName||'')).trim();
+                if(u.email)     document.getElementById('fieldEmail').value = u.email;
+                if(u.phone)     document.getElementById('fieldPhone').value = u.phone;
+                if(u.firstName) document.getElementById('navUserLabel').textContent = 'Hi, ' + u.firstName;
+            }
+        } catch(e) {}
+
+        // Cart summary
+        const DELIVERY = 40;
+        const cart = JSON.parse(localStorage.getItem('bhCart')) || [];
+        const subTotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+        const total = subTotal + DELIVERY;
+        document.getElementById('subtotalVal').textContent = '₹'+subTotal;
+        document.getElementById('totalVal').textContent = '₹'+total;
+        const itemsEl = document.getElementById('summaryItems');
+        if(cart.length){
+            itemsEl.innerHTML = cart.map(i=>`
+                <div class="summary-item">
+                    <span class="summary-item-name">${i.name} <span class="summary-item-qty">×${i.qty}</span></span>
+                    <span class="summary-item-price">₹${i.price*i.qty}</span>
+                </div>`).join('');
+        }
+
+        // Payment method
+        let activeMethod = 'upi';
+        function selectMethod(m){
+            activeMethod = m;
+            ['upi','card','nb','cod'].forEach(k=>{
+                document.getElementById('m-'+k).classList.toggle('selected', k===m);
+            });
+            document.getElementById('cardFields').classList.toggle('open', m==='card');
+            document.getElementById('upiFields').style.display = m==='upi' ? 'block' : 'none';
+        }
+        // UPI shown by default
+        document.getElementById('upiFields').style.display = 'block';
+
+        function fmtCard(el){ el.value=el.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim(); }
+        function fmtExpiry(el){ let v=el.value.replace(/\D/g,'');if(v.length>=3)v=v.slice(0,2)+' / '+v.slice(2);el.value=v; }
+
+        function handlePay(e){
+            e.preventDefault();
+            const btn = document.getElementById('payBtn');
+            btn.disabled=true; btn.textContent='Processing…';
+            setTimeout(()=>{ localStorage.removeItem('bhCart'); window.location.href='success.html'; }, 1600);
+        }
+    </script>
+</body>
+</html>

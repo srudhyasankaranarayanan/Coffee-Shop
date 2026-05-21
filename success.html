@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed — Brew Haven</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root{--cream:#F5ECD7;--espresso:#1C0F07;--caramel:#C68B3E;--latte:#D4A96A;--fog:#EDE0C8;--dark-roast:#2E1B0E;}
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            background:var(--espresso);color:var(--cream);
+            font-family:'Cormorant Garamond',serif;
+            min-height:100vh;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;
+            cursor:none;overflow:hidden;
+            background-image:radial-gradient(ellipse at 30% 60%, rgba(198,139,62,.07) 0%, transparent 60%);
+        }
+        .cursor{width:10px;height:10px;background:var(--caramel);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;}
+        .cursor-ring{width:36px;height:36px;border:1.5px solid var(--caramel);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .3s;opacity:.6;}
+
+        /* Confetti particles */
+        .particle{position:fixed;width:6px;height:6px;border-radius:1px;pointer-events:none;animation:fall linear forwards;}
+        @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+        .card{
+            background:var(--dark-roast);border:1px solid rgba(245,236,215,.1);
+            border-radius:2px;padding:60px 56px;max-width:520px;width:90%;
+            text-align:center;position:relative;overflow:hidden;
+            animation:fadeUp .9s ease both;
+        }
+        .card::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:3px;
+            background:linear-gradient(to right,var(--caramel),var(--latte),var(--caramel));
+        }
+        @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+        .check-ring{
+            width:80px;height:80px;border-radius:50%;
+            border:2px solid var(--caramel);
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto 28px;font-size:32px;
+            animation:ringPop .6s .3s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes ringPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
+        .eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--caramel);margin-bottom:12px;animation:fadeUp .7s .4s ease both;}
+        .title{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;line-height:.95;color:var(--cream);margin-bottom:8px;animation:fadeUp .7s .5s ease both;}
+        .title em{font-style:italic;color:var(--caramel);}
+        .subtitle{font-size:18px;font-weight:300;color:var(--fog);opacity:.65;line-height:1.6;margin-bottom:36px;animation:fadeUp .7s .6s ease both;}
+
+        .order-id{
+            font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;
+            color:var(--caramel);background:rgba(198,139,62,.1);
+            border:1px solid rgba(198,139,62,.25);border-radius:2px;
+            padding:10px 20px;display:inline-block;margin-bottom:36px;
+            animation:fadeUp .7s .7s ease both;
+        }
+
+        .steps{display:flex;justify-content:center;gap:0;margin-bottom:40px;animation:fadeUp .7s .8s ease both;}
+        .step{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;}
+        .step-dot{width:28px;height:28px;border-radius:50%;background:var(--caramel);display:flex;align-items:center;justify-content:center;font-size:12px;position:relative;z-index:1;}
+        .step:not(:last-child) .step-dot::after{content:'';position:absolute;left:100%;top:50%;transform:translateY(-50%);width:calc(100% + 20px);height:1px;background:rgba(198,139,62,.3);z-index:0;}
+        .step-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--fog);opacity:.5;}
+
+        .btn-row{display:flex;gap:12px;justify-content:center;animation:fadeUp .7s .9s ease both;}
+        .btn-primary{background:var(--caramel);color:var(--espresso);padding:14px 32px;border:none;cursor:pointer;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;transition:background .3s,transform .2s;text-decoration:none;display:inline-block;}
+        .btn-primary:hover{background:var(--latte);transform:translateY(-2px);}
+        .btn-ghost{background:transparent;color:var(--cream);padding:14px 32px;border:1px solid rgba(245,236,215,.2);cursor:pointer;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;transition:border-color .3s,transform .2s;text-decoration:none;display:inline-block;}
+        .btn-ghost:hover{border-color:var(--caramel);transform:translateY(-2px);}
+    </style>
+</head>
+<body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <div class="card">
+        <div class="check-ring">☕</div>
+        <div class="eyebrow">Order Confirmed</div>
+        <h1 class="title">Thank <em>You!</em></h1>
+        <p class="subtitle">Your order has been placed.<br>Your coffee is being prepared with care.</p>
+
+        <div class="order-id" id="orderId">ORDER #BH–000000</div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-dot">✓</div>
+                <div class="step-label">Confirmed</div>
+            </div>
+            <div class="step">
+                <div class="step-dot">☕</div>
+                <div class="step-label">Brewing</div>
+            </div>
+            <div class="step">
+                <div class="step-dot" style="background:rgba(198,139,62,.25);color:var(--caramel)">🚚</div>
+                <div class="step-label">On the way</div>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <a href="Home.html" class="btn-primary">Go Home</a>
+            <a href="shop.html" class="btn-ghost">Order Again</a>
+        </div>
+    </div>
+
+    <script>
+        // Cursor
+        const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+        let mx=0,my=0,rx=0,ry=0;
+        document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+        (function a(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
+        document.querySelectorAll('a,button').forEach(el=>{
+            el.addEventListener('mouseenter',()=>{ring.style.width='52px';ring.style.height='52px';ring.style.opacity='.3';});
+            el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.opacity='.6';});
+        });
+
+        // Order ID
+        document.getElementById('orderId').textContent = 'ORDER #BH–' + Math.floor(100000+Math.random()*900000);
+
+        // Confetti
+        const colors = ['#C68B3E','#D4A96A','#F5ECD7','#EDE0C8','#8B6020'];
+        function spawnParticle(){
+            const el=document.createElement('div');
+            el.className='particle';
+            el.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*.5}s;width:${4+Math.random()*6}px;height:${4+Math.random()*6}px;border-radius:${Math.random()>0.5?'50%':'2px'};`;
+            document.body.appendChild(el);
+            setTimeout(()=>el.remove(), 3000);
+        }
+        for(let i=0;i<55;i++) setTimeout(spawnParticle, i*55);
+    </script>
+</body>
+</html>
