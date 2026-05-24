@@ -2,7 +2,7 @@
 ## Brew Haven — Premium Coffee Shop Website
 
 # Project Description
-## Brew Haven is a modern and responsive coffee shop website developed using HTML, CSS, and JavaScript.
+### Brew Haven is a modern and responsive coffee shop website developed using HTML, CSS, and JavaScript.
 
 ## The website is designed with a luxury dark theme and provides an attractive user interface for coffee lovers.
 
