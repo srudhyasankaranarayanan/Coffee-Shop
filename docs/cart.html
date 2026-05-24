@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cart — Brew Haven</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- AUTH GUARD -->
+    <script>
+      (function () {
+        if (localStorage.getItem("bhLoggedIn") !== "true") {
+          window.location.replace("login.html?redirect=cart.html");
+        }
+      })();
+    </script>
+
+    <style>
+      :root {
+        --cream: #f5ecd7;
+        --espresso: #1c0f07;
+        --caramel: #c68b3e;
+        --latte: #d4a96a;
+        --fog: #ede0c8;
+        --dark-roast: #2e1b0e;
+        --card-bg: #231409;
+      }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--espresso);
+        color: var(--cream);
+        font-family: "Cormorant Garamond", serif;
+        min-height: 100vh;
+        cursor: none;
+        overflow-x: hidden;
+      }
+      .cursor {
+        width: 10px;
+        height: 10px;
+        background: var(--caramel);
+        border-radius: 50%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: screen;
+      }
+      .cursor-ring {
+        width: 36px;
+        height: 36px;
+        border: 1.5px solid var(--caramel);
+        border-radius: 50%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 9998;
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.3s,
+          height 0.3s,
+          opacity 0.3s;
+        opacity: 0.6;
+      }
+
+      /* NAV */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 22px 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(
+          to bottom,
+          rgba(28, 15, 7, 0.97),
+          transparent
+        );
+      }
+      .nav-logo {
+        font-family: "Playfair Display", serif;
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--cream);
+        text-decoration: none;
+      }
+      .nav-logo span {
+        color: var(--caramel);
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 36px;
+        list-style: none;
+      }
+      .nav-links a {
+        color: var(--fog);
+        text-decoration: none;
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        transition:
+          opacity 0.3s,
+          color 0.3s;
+        position: relative;
+      }
+      .nav-links a::after {
+        content: "";
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: var(--caramel);
+        transition: width 0.3s;
+      }
+      .nav-links a:hover {
+        opacity: 1;
+        color: var(--cream);
+      }
+      .nav-links a:hover::after {
+        width: 100%;
+      }
+      .nav-links a.active {
+        opacity: 1;
+        color: var(--caramel);
+      }
+      .nav-links a.active::after {
+        width: 100%;
+      }
+      .nav-user {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--fog);
+        opacity: 0.5;
+      }
+      .nav-logout {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--fog);
+        opacity: 0.55;
+        text-decoration: none;
+        transition:
+          color 0.2s,
+          opacity 0.2s;
+      }
+      .nav-logout:hover {
+        color: #e06060;
+        opacity: 1;
+      }
+      @media (max-width: 700px) {
+        nav {
+          padding: 16px 20px;
+        }
+        .nav-links li:not(:last-child) {
+          display: none;
+        }
+      }
+
+      /* PAGE */
+      .page-wrap {
+        max-width: 1140px;
+        margin: 0 auto;
+        padding: 130px 60px 80px;
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 48px;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        .page-wrap {
+          grid-template-columns: 1fr;
+          padding: 120px 24px 60px;
+        }
+      }
+
+      .page-eyebrow {
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--caramel);
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .page-eyebrow::before {
+        content: "";
+        display: block;
+        width: 40px;
+        height: 1px;
+        background: var(--caramel);
+        opacity: 0.5;
+      }
+      .page-title {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(40px, 6vw, 72px);
+        font-weight: 900;
+        line-height: 0.95;
+        color: var(--cream);
+        margin-bottom: 8px;
+      }
+      .page-title em {
+        font-style: italic;
+        color: var(--caramel);
+      }
+      .page-sub {
+        font-size: 17px;
+        font-weight: 300;
+        color: var(--fog);
+        opacity: 0.55;
+        margin-bottom: 44px;
+      }
+
+      .cart-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .cart-item {
+        background: var(--card-bg);
+        display: grid;
+        grid-template-columns: 72px 1fr auto;
+        gap: 20px;
+        align-items: center;
+        padding: 20px 24px;
+        transition: background 0.3s;
+        animation: fadeUp 0.5s ease both;
+      }
+      .cart-item:hover {
+        background: #2a1a0e;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .item-num {
+        width: 72px;
+        height: 72px;
+        background: rgba(198, 139, 62, 0.1);
+        border: 1px solid rgba(198, 139, 62, 0.2);
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        flex-shrink: 0;
+      }
+      .item-info {
+        min-width: 0;
+      }
+      .item-name {
+        font-family: "Playfair Display", serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--cream);
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .item-unit {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--fog);
+        opacity: 0.4;
+      }
+
+      .item-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+      }
+      .qty-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .qty-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 2px;
+        border: 1px solid rgba(245, 236, 215, 0.18);
+        background: transparent;
+        color: var(--cream);
+        font-size: 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+        line-height: 1;
+      }
+      .qty-btn:hover {
+        border-color: var(--caramel);
+        background: rgba(198, 139, 62, 0.12);
+      }
+      .qty-num {
+        font-family: "DM Mono", monospace;
+        font-size: 16px;
+        color: var(--cream);
+        min-width: 22px;
+        text-align: center;
+      }
+      .item-price {
+        font-family: "Playfair Display", serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--cream);
+      }
+      .remove-btn {
+        background: none;
+        border: none;
+        color: var(--fog);
+        opacity: 0.25;
+        cursor: pointer;
+        font-size: 13px;
+        font-family: "DM Mono", monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition:
+          opacity 0.2s,
+          color 0.2s;
+        padding: 0;
+      }
+      .remove-btn:hover {
+        opacity: 1;
+        color: #e06060;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 80px 0;
+        animation: fadeUp 0.6s ease both;
+      }
+      .empty-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.35;
+      }
+      .empty-title {
+        font-family: "Playfair Display", serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--cream);
+        margin-bottom: 10px;
+      }
+      .empty-title em {
+        font-style: italic;
+        color: var(--caramel);
+      }
+      .empty-sub {
+        font-size: 17px;
+        font-weight: 300;
+        color: var(--fog);
+        opacity: 0.5;
+        margin-bottom: 32px;
+      }
+      .btn-shop {
+        display: inline-block;
+        background: var(--caramel);
+        color: var(--espresso);
+        padding: 14px 36px;
+        border-radius: 2px;
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition:
+          background 0.3s,
+          transform 0.2s;
+      }
+      .btn-shop:hover {
+        background: var(--latte);
+        transform: translateY(-2px);
+      }
+
+      .summary-box {
+        background: var(--card-bg);
+        border: 1px solid rgba(245, 236, 215, 0.1);
+        border-radius: 2px;
+        padding: 30px;
+        position: sticky;
+        top: 110px;
+      }
+      .summary-title {
+        font-family: "Playfair Display", serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--cream);
+        margin-bottom: 26px;
+      }
+      .summary-title em {
+        font-style: italic;
+        color: var(--caramel);
+      }
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .summary-label {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--fog);
+        opacity: 0.5;
+      }
+      .summary-val {
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+        color: var(--fog);
+        opacity: 0.75;
+      }
+      .summary-divider {
+        height: 1px;
+        background: rgba(245, 236, 215, 0.1);
+        margin: 18px 0;
+      }
+      .summary-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .summary-total-label {
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--fog);
+        opacity: 0.55;
+      }
+      .summary-total-val {
+        font-family: "Playfair Display", serif;
+        font-size: 38px;
+        font-weight: 900;
+        color: var(--cream);
+      }
+
+      .btn-checkout {
+        width: 100%;
+        margin-top: 22px;
+        padding: 16px;
+        background: var(--caramel);
+        border: none;
+        color: var(--espresso);
+        cursor: pointer;
+        border-radius: 2px;
+        font-family: "DM Mono", monospace;
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        transition:
+          background 0.3s,
+          transform 0.2s;
+        display: block;
+        text-align: center;
+        text-decoration: none;
+      }
+      .btn-checkout:hover {
+        background: var(--latte);
+        transform: translateY(-2px);
+      }
+      .btn-clear {
+        width: 100%;
+        margin-top: 10px;
+        padding: 13px;
+        background: transparent;
+        border: 1px solid rgba(245, 236, 215, 0.12);
+        color: var(--fog);
+        cursor: pointer;
+        border-radius: 2px;
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        transition:
+          border-color 0.3s,
+          color 0.3s,
+          background 0.3s;
+        opacity: 0.6;
+      }
+      .btn-clear:hover {
+        border-color: #e06060;
+        color: #e06060;
+        opacity: 1;
+        background: rgba(224, 96, 96, 0.05);
+      }
+
+      .promo-row {
+        margin-top: 18px;
+        display: flex;
+        gap: 8px;
+      }
+      .promo-input {
+        flex: 1;
+        background: rgba(28, 15, 7, 0.5);
+        border: 1px solid rgba(245, 236, 215, 0.12);
+        color: var(--cream);
+        padding: 11px 14px;
+        border-radius: 2px;
+        font-family: "Cormorant Garamond", serif;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+      .promo-input::placeholder {
+        color: var(--fog);
+        opacity: 0.3;
+      }
+      .promo-input:focus {
+        border-color: var(--caramel);
+      }
+      .btn-promo {
+        padding: 11px 18px;
+        background: rgba(198, 139, 62, 0.12);
+        border: 1px solid var(--caramel);
+        color: var(--caramel);
+        cursor: pointer;
+        border-radius: 2px;
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        transition: background 0.3s;
+        white-space: nowrap;
+      }
+      .btn-promo:hover {
+        background: var(--caramel);
+        color: var(--espresso);
+      }
+
+      .security-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 14px;
+        font-family: "DM Mono", monospace;
+        font-size: 9px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--fog);
+        opacity: 0.28;
+      }
+
+      footer {
+        background: var(--dark-roast);
+        border-top: 1px solid rgba(245, 236, 215, 0.07);
+        padding: 40px 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .footer-logo {
+        font-family: "Playfair Display", serif;
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--cream);
+      }
+      .footer-logo span {
+        color: var(--caramel);
+      }
+      .footer-copy {
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        color: var(--fog);
+        opacity: 0.3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <nav>
+      <a href="index.html" class="nav-logo">Brew<span>Haven</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">index</a></li>
+        <li><a href="shop.html">Menu</a></li>
+        <li><a href="cart.html" class="active">Cart</a></li>
+        <li><a class="nav-user" id="navUserLabel"></a></li>
+        <li><a href="logout.html" class="nav-logout">Sign Out</a></li>
+      </ul>
+    </nav>
+
+    <div class="page-wrap">
+      <div>
+        <div class="page-eyebrow">Your Selection</div>
+        <h1 class="page-title">Your <em>Cart</em></h1>
+        <p class="page-sub" id="itemCountLabel">Loading…</p>
+        <div id="cartContent"></div>
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-title">Order <em>Summary</em></div>
+        <div class="summary-row">
+          <span class="summary-label">Items</span>
+          <span class="summary-val" id="sumItems">0</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Subtotal</span>
+          <span class="summary-val" id="sumSubtotal">₹0</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Delivery</span>
+          <span class="summary-val" id="sumDelivery">₹40</span>
+        </div>
+        <div class="promo-row">
+          <input
+            class="promo-input"
+            type="text"
+            placeholder="Promo code"
+            id="promoInput"
+          />
+          <button class="btn-promo" onclick="applyPromo()">Apply</button>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-total">
+          <span class="summary-total-label">Total</span>
+          <span class="summary-total-val" id="sumTotal">₹40</span>
+        </div>
+        <a href="payment.html" class="btn-checkout" id="checkoutBtn"
+          >Checkout →</a
+        >
+        <button class="btn-clear" onclick="clearCart()">Clear Cart</button>
+        <div class="security-note">🔒 &nbsp; Secure checkout</div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="footer-logo">Brew<span>Haven</span></div>
+      <div class="footer-copy">© 2026 Brew Haven Coffee Shop</div>
+    </footer>
+
+    <script>
+      const cursor = document.getElementById("cursor"),
+        ring = document.getElementById("cursorRing");
+      let mx = 0,
+        my = 0,
+        rx = 0,
+        ry = 0;
+      document.addEventListener("mousemove", (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+        cursor.style.left = mx + "px";
+        cursor.style.top = my + "px";
+      });
+      (function a() {
+        rx += (mx - rx) * 0.12;
+        ry += (my - ry) * 0.12;
+        ring.style.left = rx + "px";
+        ring.style.top = ry + "px";
+        requestAnimationFrame(a);
+      })();
+
+      function hookCursor() {
+        document.querySelectorAll("a,button,input").forEach((el) => {
+          el.addEventListener("mouseenter", () => {
+            ring.style.width = "52px";
+            ring.style.height = "52px";
+            ring.style.opacity = ".3";
+          });
+          el.addEventListener("mouseleave", () => {
+            ring.style.width = "36px";
+            ring.style.height = "36px";
+            ring.style.opacity = ".6";
+          });
+        });
+      }
+
+      // User greeting
+      try {
+        const u = JSON.parse(localStorage.getItem("bhUser"));
+        if (u && u.firstName)
+          document.getElementById("navUserLabel").textContent =
+            "Hi, " + u.firstName;
+      } catch (e) {}
+
+      const DELIVERY = 40;
+      const COFFEE_EMOJIS = {
+        Cappuccino: "☕",
+        Espresso: "⚡",
+        Latte: "🥛",
+        Mocha: "🍫",
+        "Cold Coffee": "🧊",
+        Americano: "🌊",
+        "Nitro Coffee": "💨",
+        Affogato: "🍨",
+        "Mud Coffee": "🌿",
+        "Pumpkin Spice Latte": "🎃",
+      };
+      let cart = JSON.parse(localStorage.getItem("bhCart")) || [];
+      function save() {
+        localStorage.setItem("bhCart", JSON.stringify(cart));
+      }
+
+      function render() {
+        const content = document.getElementById("cartContent");
+        const totalItems = cart.reduce((s, i) => s + i.qty, 0);
+        const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const total = subtotal + (cart.length ? DELIVERY : 0);
+
+        document.getElementById("itemCountLabel").textContent = totalItems
+          ? totalItems + " item" + (totalItems > 1 ? "s" : "") + " in your cart"
+          : "Your cart is empty";
+        document.getElementById("sumItems").textContent = totalItems;
+        document.getElementById("sumSubtotal").textContent = "₹" + subtotal;
+        document.getElementById("sumDelivery").textContent = cart.length
+          ? "₹" + DELIVERY
+          : "₹0";
+        document.getElementById("sumTotal").textContent = "₹" + total;
+
+        const btn = document.getElementById("checkoutBtn");
+        if (!cart.length) {
+          btn.style.pointerEvents = "none";
+          btn.style.opacity = ".35";
+        } else {
+          btn.style.pointerEvents = "";
+          btn.style.opacity = "";
+        }
+
+        if (!cart.length) {
+          content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">☕</div>
+                        <div class="empty-title">Your cart is <em>empty</em></div>
+                        <p class="empty-sub">Looks like you haven't added anything yet.</p>
+                        <a href="shop.html" class="btn-shop">Browse the Menu →</a>
+                    </div>`;
+          hookCursor();
+          return;
+        }
+
+        content.innerHTML = `<div class="cart-list">${cart
+          .map(
+            (item, idx) => `
+                <div class="cart-item" id="item-${idx}" style="animation-delay:${idx * 60}ms">
+                    <div class="item-num">${COFFEE_EMOJIS[item.name] || "☕"}</div>
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-unit">₹${item.price} each</div>
+                    </div>
+                    <div class="item-controls">
+                        <div class="qty-row">
+                            <button class="qty-btn" onclick="changeQty(${idx},-1)">−</button>
+                            <span class="qty-num">${item.qty}</span>
+                            <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
+                        </div>
+                        <div class="item-price">₹${item.price * item.qty}</div>
+                        <button class="remove-btn" onclick="removeItem(${idx})">✕ Remove</button>
+                    </div>
+                </div>`,
+          )
+          .join("")}</div>`;
+        hookCursor();
+      }
+
+      function changeQty(idx, delta) {
+        cart[idx].qty = Math.max(1, cart[idx].qty + delta);
+        save();
+        render();
+      }
+      function removeItem(idx) {
+        const el = document.getElementById("item-" + idx);
+        if (el) {
+          el.style.opacity = "0";
+          el.style.transform = "translateX(20px)";
+          el.style.transition = "opacity .3s,transform .3s";
+        }
+        setTimeout(() => {
+          cart.splice(idx, 1);
+          save();
+          render();
+        }, 300);
+      }
+      function clearCart() {
+        if (!cart.length) return;
+        cart = [];
+        save();
+        render();
+      }
+      function applyPromo() {
+        const v = document
+          .getElementById("promoInput")
+          .value.trim()
+          .toUpperCase();
+        if (v === "BREW10") alert("Promo applied! 10% off at checkout ☕");
+        else alert("Invalid promo code.");
+      }
+
+      render();
+    </script>
+  </body>
+</html>
